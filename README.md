@@ -2,8 +2,8 @@ This is an isolated test-case for `haskell-opencv` issue [#123](https://github.c
 
 The setup is as follows:
 * We have a C++ library called `libfoo` which exports a single function `foo` which just throws an exception.
-* We have a Haskell library called `hsfoo` which also exports a function named `foo`. 
-  This function calls the C++ `foo` function using the `inline-c` library but 
+* We have a Haskell library called `hsfoo` which also exports a function named `foo`.
+  This function calls the C++ `foo` function using the `inline-c` library but
   wraps it in a `try...catch` block to intercept the C++ exception to turn it into a Haskell exception.
 * The `hsfoo` package also provides an executable that just calls the `foo` function.
 
@@ -28,3 +28,5 @@ Abort trap: 6
 ```
 
 (Note that exit code 134 [means](https://stackoverflow.com/a/23098735/442793) the program received the SIGABRT signal).
+
+To rule out bugs in `inline-c` or `inlince-c-cpp` I also added a `Foo.Manual` module in `hslib` which exports the `foo_manual` function. Instead of inlining some C++ code this module explicitly provides a FFI call to a manually created `foo_manual` C++ function in `foo-wrapper.cpp` which does the `try...catch` wrapping. Additionally I added a `test-manual` executable which calls `foo_manual`. Unfortunately this executables also aborts.

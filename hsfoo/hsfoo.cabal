@@ -13,6 +13,8 @@ library
     hs-source-dirs: src
     cxx-options: -std=c++11
 
+    cxx-sources: foo-wrapper.cpp
+
     if os(darwin)
       extra-libraries: c++
     else
@@ -31,12 +33,20 @@ library
 
     exposed-modules:
         Foo
+        Foo.Manual
 
     default-language: Haskell2010
 
 executable test
     hs-source-dirs:   test
     main-is:          test.hs
+    default-language: Haskell2010
+    ghc-options:      -Wall
+    build-depends: base >= 4.8 && < 5, hsfoo
+
+executable test-manual
+    hs-source-dirs:   test
+    main-is:          test-manual.hs
     default-language: Haskell2010
     ghc-options:      -Wall
     build-depends: base >= 4.8 && < 5, hsfoo

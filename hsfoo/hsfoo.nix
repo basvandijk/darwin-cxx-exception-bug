@@ -11,6 +11,7 @@ mkDerivation {
     "^test/.*"
     "^hsfoo.cabal$"
     "^Setup.hs$"
+    "^foo-wrapper.cpp$"
   ];
   setupHaskellDepends = [ base Cabal ];
   libraryHaskellDepends = [ base bytestring inline-c inline-c-cpp ];
