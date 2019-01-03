@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.12)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 project(test-foo VERSION 1.0.0 DESCRIPTION "an executable that executes the foo function")
 include(GNUInstallDirs)
 add_executable(test test.cpp)
