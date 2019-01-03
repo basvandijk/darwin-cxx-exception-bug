@@ -4,10 +4,7 @@ version:       0.0.0.0
 license:       BSD-3-Clause
 author:        Bas van Dijk <v.dijk.bas@gmail.com>
 maintainer:    Bas van Dijk <v.dijk.bas@gmail.com>
-build-type:    Custom
-
-custom-setup
-    setup-depends: base, Cabal >= 1.23
+build-type:    Simple
 
 library
     hs-source-dirs: src
