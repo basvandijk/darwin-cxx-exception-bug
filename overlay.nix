@@ -17,6 +17,8 @@ let
 in  {
   libfoo = final.callPackage ./libfoo {};
 
+  foo = final.callPackage ./foo {};
+
   haskell = previous.haskell // {
     packageOverrides = self: super:
       previous.haskell.packageOverrides self super //

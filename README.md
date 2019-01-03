@@ -30,3 +30,10 @@ Abort trap: 6
 (Note that exit code 134 [means](https://stackoverflow.com/a/23098735/442793) the program received the SIGABRT signal).
 
 To rule out bugs in `inline-c` or `inlince-c-cpp` I also added a `Foo.Manual` module in `hslib` which exports the `foo_manual` function. Instead of inlining some C++ code this module explicitly provides a FFI call to a manually created `foo_manual` C++ function in `foo-wrapper.cpp` which does the `try...catch` wrapping. Additionally I added a `test-manual` executable which calls `foo_manual`. Unfortunately this executables also aborts.
+
+I also included a C++ executable in the `foo` directory which calls the `foo()` function wrapped in a `try..catch` block. This executable runs correctly and doesn't abort:
+
+```
+> $(nix-build --no-link -A foo)/bin/test
+Whoops!
+```
