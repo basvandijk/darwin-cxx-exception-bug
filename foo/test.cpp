@@ -18,8 +18,8 @@ int main()
 {
 	int r = foo_wrapper();
 	if (r != 0)
-    {
+    	{
 		std::cout << "Whoops!\n";
 		return 1;
-    }
+    	}
 }
