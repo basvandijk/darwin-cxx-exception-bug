@@ -114,3 +114,5 @@ Deleting: /var/folders/8m/tqlhlzrd4lsbb8r3j9zw7wsw0000gn/T/ghc48558_0
 ```
 
 As we can see `/nix/store/vcgm727r50w7mwy7fxmswhq4ffj2qqf0-clang-wrapper-5.0.2/bin/cc` is being used for linking. I suspect that if we change this to `/nix/store/vcgm727r50w7mwy7fxmswhq4ffj2qqf0-clang-wrapper-5.0.2/bin/c++` which is a symlink to `clang++` the resulting executable will correctly catch C++ exceptions.
+
+I just tried using `c++` for linking by passing `-pgml c++` to GHC but that didn't help. So my suspicion was wrong...
