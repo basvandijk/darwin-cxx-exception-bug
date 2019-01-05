@@ -1,5 +1,26 @@
 This is an isolated test-case for `haskell-opencv` issue [#123](https://github.com/LumiGuide/haskell-opencv/issues/123).
 
+
+Work-around
+===========
+
+Adam Sandberg Eriksson just [mentioned on GHC-devs](https://mail.haskell.org/pipermail/ghc-devs/2019-January/016779.html) that there's an existing GHC ticket that covers this problem. See [#11829](https://ghc.haskell.org/trac/ghc/ticket/11829).
+
+The work-around is to add the following to the library component of `hsfoo.cabal`:
+
+```
+if os(darwin)
+  ld-options: -Wl,-keep_dwarf_unwind
+```
+
+I've now added this and it fixes the problem indeed!
+
+The next action is to ask why GHC doesn't pass this option itself when linking on OS X...
+
+
+Problem description
+===================
+
 The setup is as follows:
 * We have a C++ library called `libfoo` which exports a single function `foo` which just throws an exception.
 * We have a Haskell library called `hsfoo` which also exports a function named `foo`.
@@ -29,6 +50,10 @@ Abort trap: 6
 
 (Note that exit code 134 [means](https://stackoverflow.com/a/23098735/442793) the program received the SIGABRT signal).
 
+
+Debugging notes
+===============
+
 To rule out bugs in `inline-c` or `inlince-c-cpp` I also added a `Foo.Manual` module in `hslib` which exports the `foo_manual` function. Instead of inlining some C++ code this module explicitly provides a FFI call to a manually created `foo_manual` C++ function in `foo-wrapper.cpp` which does the `try...catch` wrapping. Additionally I added a `test-manual` executable which calls `foo_manual`. Unfortunately this executables also aborts.
 
 I also included a C++ executable in the `foo` directory which calls the `foo()` function wrapped in a `try..catch` block. This executable runs correctly and doesn't abort:
@@ -43,7 +68,7 @@ I also included a C++ executable in the `foo` directory which calls the `foo()` 
 Whoops!
 ```
 
-Note that `clang++` is being used for linking. My suspicion is that GHC is using a different linker. To check if this is true I performed a `cabal new-build -v` and reran the last linking step with `-v`: 
+Note that `clang++` is being used for linking. My suspicion is that GHC is using a different linker. To check if this is true I performed a `cabal new-build -v` and reran the last linking step with `-v`:
 
 ```
 $ /nix/store/5f5z5bmsmd4v71bazbql2jxp9z2xb8s7-ghc-8.6.3-with-packages/bin/ghc --make -fbuilding-cabal-package -O -static -outputdir /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -odir /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -hidir /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -stubdir /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -i -i/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -itest -i/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/autogen -i/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/global-autogen -I/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/autogen -I/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/global-autogen -I/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test-tmp -optP-include -optP/Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/autogen/cabal_macros.h -hide-all-packages -Wmissing-home-modules -no-user-package-db -package-db /Users/basvandijk/.cabal/store/ghc-8.6.3/package.db -package-db /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/packagedb/ghc-8.6.3 -package-db /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/package.conf.inplace -package-id base-4.12.0.0 -package-id hsfoo-0.0.0.0-inplace -XHaskell2010 test/test.hs -o /Users/basvandijk/engineering/darwin-cxx-exception-bug/hsfoo/dist-newstyle/build/x86_64-osx/ghc-8.6.3/hsfoo-0.0.0.0/x/test/build/test/test -Wall -hide-all-packages -v

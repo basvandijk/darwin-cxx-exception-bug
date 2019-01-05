@@ -13,6 +13,7 @@ library
 
     if os(darwin)
       extra-libraries: c++
+      ld-options: -Wl,-keep_dwarf_unwind
     else
       extra-libraries: stdc++
       ghc-options:   -lstdc++
